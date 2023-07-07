@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Depurador de Código</title>
+  <style>
+    /* Estilos generales */
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    /* Contenedor principal */
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Título */
+    .title {
+      text-align: center;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    label{
+      width: 100%;
+      text-align: center;
+    }
+    textarea{
+      width: 99%;
+      text-align: left;
+    }
+
+    /* Área de código */
+    .code-area {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    /* Botón de depuración */
+    .debug-button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      border-radius: 4px;
+    }
+
+    /* Consola de depuración */
+    .debug-console {
+      border: 1px solid #ccc;
+      padding: 10px;
+      overflow-y: scroll;
+      max-height: 200px;
+      background-color: #f5f5f5;
+      margin-bottom: 20px;
+    }
+
+    /* Estilos responsivos */
+    @media (max-width: 600px) {
+      .container {
+        padding: 10px;
+      }
+    }
+  </style>
+  <script>
+     function debug() {
+  var code = document.getElementById("code").value;
+  var output = document.getElementById("output");
+  output.innerHTML = "";
+
+  try {
+    // Evaluar el código introducido
+    eval(code);
+    output.innerHTML = "¡Depuración completada!";
+  } catch (error) {
+    // Mostrar errores en la consola de depuración
+    output.innerHTML = "Error: " + error.message;
+  }
+  
+  // Agregar información de depuración adicional
+  output.innerHTML += "<br><br>Detalles de depuración:<br>";
+  output.innerHTML += "-----------------------<br>";
+  output.innerHTML += "Variables locales:<br>";
+  output.innerHTML += JSON.stringify(getLocalVariables(eval), null, 2) + "<br>";
+  output.innerHTML += "-----------------------<br>";
+  output.innerHTML += "Stack de llamadas:<br>";
+  output.innerHTML += getCallStack() + "<br>";
+  output.innerHTML += "-----------------------<br>";
+  output.innerHTML += "Funciones definidas:<br>";
+  output.innerHTML += getDefinedFunctions(eval).join(", ") + "<br>";
+  output.innerHTML += "-----------------------<br>";
+  output.innerHTML += "Variables globales:<br>";
+  output.innerHTML += getGlobalVariables(eval).join(", ") + "<br>";
+  output.innerHTML += "-----------------------<br>";
+  output.innerHTML += "Total de líneas de código:<br>";
+  output.innerHTML += getTotalLinesOfCode(code) + "<br>";
+  output.innerHTML += "-----------------------<br>";
+  output.innerHTML += "Porcentaje de comentarios:<br>";
+  output.innerHTML += getCommentPercentage(code) + "%<br>";
+}
+
+// Obtener las variables locales en el contexto actual
+function getLocalVariables(eval) {
+  var localVariables = {};
+  var properties = Object.getOwnPropertyNames(eval);
+
+  for (var i = 0; i < properties.length; i++) {
+    var property = properties[i];
+
+    if (property !== "localVariables" && property !== "code" && property !== "output") {
+      localVariables[property] = eval[property];
+    }
+  }
+
+  return localVariables;
+}
+
+// Obtener el stack de llamadas actual
+function getCallStack() {
+  var stack = new Error().stack;
+  return stack.replace(/(.*?\n){2}/, "");
+}
+
+// Obtener las funciones definidas en el código
+function getDefinedFunctions(eval) {
+  var functions = [];
+  var regex = /function\s+([^\s(]+)/g;
+  var matches;
+  
+  while ((matches = regex.exec(code)) !== null) {
+    functions.push(matches[1]);
+  }
+  
+  return functions;
+}
+
+// Obtener las variables globales definidas en el código
+function getGlobalVariables(eval) {
+  var globalVariables = [];
+  var regex = /var\s+([^\s=;]+)/g;
+  var matches;
+  
+  while ((matches = regex.exec(code)) !== null) {
+    globalVariables.push(matches[1]);
+  }
+  
+  return globalVariables;
+}
+
+// Obtener el número total de líneas de código
+function getTotalLinesOfCode(code) {
+  var lines = code.split("\n");
+  return lines.length;
+}
+
+// Obtener el porcentaje de comentarios en el código
+function getCommentPercentage(code) {
+  var lines = code.split("\n");
+  var totalLines = lines.length;
+  var commentLines = 0;
+  
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i].trim();
+    
+    if (line.startsWith("//") || line.startsWith("/*") || line.endsWith("*/")) {
+      commentLines++;
+    }
+  }
+  
+  return ((commentLines / totalLines) * 100).toFixed(2);
+}
+
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1 class="title">Depurador de Código</h1>
+
+    <div class="code-area">
+      <label for="code">Código:</label>
+      <textarea id="code" rows="10" cols="50"></textarea>
+    </div>
+
+    <button class="debug-button" onclick="debug()">Depurar</button>
+
+    <h2 class="title">Consola de Depuración:</h2>
+    <div class="debug-console" id="output"></div>
+  </div>
+</body>
+</html>
+
+
+
